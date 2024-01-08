@@ -32,7 +32,22 @@ async function deployDiamond () {
   console.log('Deploying facets')
   const FacetNames = [
     'DiamondLoupeFacet',
-    'OwnershipFacet'
+    'OwnershipFacet',
+
+    'MarketplaceOwnerFacet',
+    'MarketplaceListingFacet',
+    'MarketplaceFulfillListingFacet',
+    'MarketplaceFulfillRequestFacet',
+    'MarketplaceFulfillAmountRequestFacet',
+    'MarketplaceFulfillOfferFacet',
+    'MarketplaceFulfillSealedBidListingFacet',
+    'MarketplaceFulfillEnglishListingFacet',
+    'MarketplaceModifyRequestFacet',
+    'MarketplaceModifyListingFacet',
+    'MarketplaceRequestFacet',
+    'MarketplaceCloseListingFacet',
+    'MarketplaceCloseSealedBidListingFacet',
+    'MarketplaceCloseRequestFacet'
   ]
   const cut = []
   for (const FacetName of FacetNames) {
@@ -47,9 +62,15 @@ async function deployDiamond () {
     })
   }
 
+  // deploy testing ERC1155 Address
+  const TestERC1155 = await ethers.getContractFactory('testERC1155')
+  const testERC1155 = await TestERC1155.deploy()
+  await testERC1155.deployed()
+  console.log('testERC1155 deployed:', testERC1155.address)
+
   // upgrade diamond with facets
   console.log('')
-  console.log('Diamond Cut:', cut)
+  // console.log('Diamond Cut:', cut)
   const diamondCut = await ethers.getContractAt('IDiamondCut', diamond.address)
   let tx
   let receipt
@@ -62,7 +83,7 @@ async function deployDiamond () {
     throw Error(`Diamond upgrade failed: ${tx.hash}`)
   }
   console.log('Completed diamond cut')
-  return diamond.address
+  return {diamond: diamond.address, ERC1155: testERC1155.address}
 }
 
 // We recommend this pattern to be able to use async/await everywhere
